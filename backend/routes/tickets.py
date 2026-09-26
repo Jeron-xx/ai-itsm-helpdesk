@@ -78,6 +78,21 @@ def analyze_ticket(ticket: TicketRequest):
         assignment_group = "Network Support"
 
 
+    # Wi-Fi Incident
+    elif (
+        "wifi" in description
+        or "wi-fi" in description
+        or "wireless" in description
+    ):
+
+        ticket_type = "Incident"
+        category = "Network / Wi-Fi"
+        impact = "Medium"
+        urgency = "Medium"
+        priority = "Medium"
+        assignment_group = "Network Support"
+
+
     # Password Incident
     elif (
         "password" in description

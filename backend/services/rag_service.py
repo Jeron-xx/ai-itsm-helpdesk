@@ -5,43 +5,41 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 
 
-# ==========================================
-# Project paths
-# ==========================================
+# ============================================================
+# Paths
+# ============================================================
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 KNOWLEDGE_DIR = BASE_DIR / "knowledge"
-
 CHROMA_DIR = BASE_DIR / "backend" / "chroma_db"
 
 
-# ==========================================
-# Embedding model
-# ==========================================
+# ============================================================
+# Embedding Model
+# ============================================================
 
 embedding_model = SentenceTransformer(
     "all-MiniLM-L6-v2"
 )
 
 
-# ==========================================
+# ============================================================
 # ChromaDB
-# ==========================================
+# ============================================================
 
 chroma_client = chromadb.PersistentClient(
     path=str(CHROMA_DIR)
 )
-
 
 collection = chroma_client.get_or_create_collection(
     name="it_knowledge"
 )
 
 
-# ==========================================
-# Load knowledge documents
-# ==========================================
+# ============================================================
+# Load Knowledge Documents
+# ============================================================
 
 def load_knowledge_documents():
 
@@ -55,7 +53,6 @@ def load_knowledge_documents():
             encoding="utf-8"
         )
 
-        # Split document into sections
         sections = content.split("\n## ")
 
         for index, section in enumerate(sections):
@@ -78,15 +75,13 @@ def load_knowledge_documents():
     return documents, ids, sources
 
 
-# ==========================================
-# Build knowledge base
-# ==========================================
+# ============================================================
+# Build Knowledge Base
+# ============================================================
 
 def build_knowledge_base():
 
-    documents, ids, sources = (
-        load_knowledge_documents()
-    )
+    documents, ids, sources = load_knowledge_documents()
 
     if not documents:
         return 0
@@ -95,13 +90,9 @@ def build_knowledge_base():
         documents
     ).tolist()
 
-    # Remove old collection contents
-    # so outdated chunks are not retained.
-
     existing_ids = collection.get()["ids"]
 
     if existing_ids:
-
         collection.delete(
             ids=existing_ids
         )
@@ -121,14 +112,11 @@ def build_knowledge_base():
     return len(documents)
 
 
-# ==========================================
-# Search knowledge
-# ==========================================
+# ============================================================
+# Semantic Search
+# ============================================================
 
-def search_knowledge(
-    query: str,
-    top_k: int = 6
-):
+def search_knowledge(query: str, top_k: int = 6):
 
     query_embedding = embedding_model.encode(
         [query]
@@ -147,9 +135,9 @@ def search_knowledge(
     return results
 
 
-# ==========================================
-# Simple word extraction
-# ==========================================
+# ============================================================
+# Text Processing
+# ============================================================
 
 def extract_words(text):
 
@@ -186,7 +174,13 @@ def extract_words(text):
         "that",
         "be",
         "has",
-        "have"
+        "have",
+        "am",
+        "was",
+        "were",
+        "do",
+        "does",
+        "unable"
     }
 
     return {
@@ -196,14 +190,7 @@ def extract_words(text):
     }
 
 
-# ==========================================
-# Calculate lexical overlap
-# ==========================================
-
-def calculate_overlap(
-    query: str,
-    document: str
-):
+def calculate_overlap(query, document):
 
     query_words = extract_words(query)
 
@@ -212,25 +199,186 @@ def calculate_overlap(
     if not query_words:
         return 0
 
-    matching_words = (
-        query_words.intersection(
-            document_words
-        )
+    matching_words = query_words.intersection(
+        document_words
     )
 
-    return len(matching_words) / len(
-        query_words
+    return len(matching_words) / len(query_words)
+
+
+# ============================================================
+# Intent Detection
+# ============================================================
+
+def detect_knowledge_source(query):
+
+    query_lower = query.lower()
+
+    # --------------------------------------------------------
+    # VPN
+    # --------------------------------------------------------
+
+    vpn_terms = [
+        "vpn",
+        "virtual private network",
+        "vpn connection",
+        "vpn disconnect",
+        "vpn disconnected",
+        "vpn not working"
+    ]
+
+    if any(
+        term in query_lower
+        for term in vpn_terms
+    ):
+        return "vpn.md"
+
+
+    # --------------------------------------------------------
+    # Password / Login / Account Access
+    # --------------------------------------------------------
+
+    password_terms = [
+        "password",
+        "password expired",
+        "forgot password",
+        "reset password",
+        "sign in",
+        "signing in",
+        "signed in",
+        "log in",
+        "logging in",
+        "logged in",
+        "login",
+        "cannot access my account",
+        "can't access my account",
+        "cannot access account",
+        "can't access account",
+        "unable to access my account",
+        "unable to access account",
+        "company account",
+        "corporate account",
+        "account access",
+        "authentication",
+        "authentication problem",
+        "authentication issue"
+    ]
+
+    if any(
+        term in query_lower
+        for term in password_terms
+    ):
+        return "password.md"
+
+
+    # --------------------------------------------------------
+    # Outlook / Email
+    # --------------------------------------------------------
+
+    outlook_terms = [
+        "outlook",
+        "email",
+        "emails",
+        "e-mail",
+        "mail",
+        "mailbox",
+        "synchroniz",
+        "sync",
+        "email not working",
+        "emails not working"
+    ]
+
+    if any(
+        term in query_lower
+        for term in outlook_terms
+    ):
+        return "outlook.md"
+
+
+    # --------------------------------------------------------
+    # VS Code / Software Provisioning
+    # --------------------------------------------------------
+
+    vscode_terms = [
+        "vscode",
+        "vs code",
+        "visual studio code"
+    ]
+
+    if any(
+        term in query_lower
+        for term in vscode_terms
+    ):
+        return "vscode.md"
+
+
+    # --------------------------------------------------------
+    # Wi-Fi / Wireless Network
+    # --------------------------------------------------------
+
+    wifi_terms = [
+        "wifi",
+        "wi-fi",
+        "wireless",
+        "wireless network",
+        "wifi connection",
+        "wi-fi connection",
+        "wifi not working",
+        "wi-fi not working",
+        "cannot connect to wifi",
+        "can't connect to wifi",
+        "cannot connect to wi-fi",
+        "can't connect to wi-fi"
+    ]
+
+    if any(
+        term in query_lower
+        for term in wifi_terms
+    ):
+        return "wifi.md"
+
+
+    # --------------------------------------------------------
+    # No known intent
+    # --------------------------------------------------------
+
+    return None
+
+
+# ============================================================
+# Complete Source Document
+# ============================================================
+
+def get_complete_source_document(source_name):
+
+    source_path = KNOWLEDGE_DIR / source_name
+
+    if not source_path.exists():
+        return ""
+
+    return source_path.read_text(
+        encoding="utf-8"
+    ).strip()
+
+
+# ============================================================
+# RAG Context
+# ============================================================
+
+def get_rag_context(query: str, top_k: int = 6):
+
+    # --------------------------------------------------------
+    # Detect known IT intent
+    # --------------------------------------------------------
+
+    detected_source = detect_knowledge_source(
+        query
     )
 
 
-# ==========================================
-# Get RAG context
-# ==========================================
-
-def get_rag_context(
-    query: str,
-    top_k: int = 6
-):
+    # --------------------------------------------------------
+    # Semantic search
+    # --------------------------------------------------------
 
     results = search_knowledge(
         query,
@@ -241,7 +389,32 @@ def get_rag_context(
     metadatas = results["metadatas"][0]
     distances = results["distances"][0]
 
+
+    # --------------------------------------------------------
+    # No semantic results
+    # --------------------------------------------------------
+
     if not documents:
+
+        if detected_source:
+
+            context = get_complete_source_document(
+                detected_source
+            )
+
+            if context:
+
+                confidence = 0.60
+
+                if detected_source == "vscode.md":
+                    confidence = 0.75
+
+                return {
+                    "context": context,
+                    "sources": [detected_source],
+                    "confidence": confidence,
+                    "escalate": False
+                }
 
         return {
             "context": "",
@@ -251,22 +424,19 @@ def get_rag_context(
         }
 
 
-    # ======================================
-    # Calculate relevance for each document
-    # ======================================
+    # --------------------------------------------------------
+    # Calculate semantic relevance
+    # --------------------------------------------------------
 
-    relevant_documents = []
-    relevant_metadatas = []
-    relevance_scores = []
+    relevant_chunks = []
+
+    source_scores = {}
 
     for document, metadata, distance in zip(
         documents,
         metadatas,
         distances
     ):
-
-        # Convert Chroma distance into a
-        # simple semantic similarity score.
 
         semantic_similarity = max(
             0,
@@ -283,32 +453,111 @@ def get_rag_context(
 
         document_relevance = (
             semantic_similarity * 0.7
-            + lexical_overlap * 0.3
+            +
+            lexical_overlap * 0.3
         )
-
-        # Only keep documents that have
-        # enough relevance to the query.
 
         if document_relevance >= 0.35:
 
-            relevant_documents.append(
-                document
+            relevant_chunks.append(
+                {
+                    "document": document,
+                    "metadata": metadata,
+                    "score": document_relevance
+                }
             )
 
-            relevant_metadatas.append(
-                metadata
+            source = metadata.get(
+                "source",
+                ""
             )
 
-            relevance_scores.append(
-                document_relevance
+            if source:
+
+                if (
+                    source not in source_scores
+                    or
+                    document_relevance
+                    > source_scores[source]
+                ):
+
+                    source_scores[source] = (
+                        document_relevance
+                    )
+
+
+    # --------------------------------------------------------
+    # Intent-based source takes priority
+    # --------------------------------------------------------
+
+    if detected_source:
+
+        selected_source = detected_source
+
+        context = get_complete_source_document(
+            selected_source
+        )
+
+        if context:
+
+            confidence = source_scores.get(
+                selected_source,
+                0.60
             )
 
+            # Minimum confidence for known topics
 
-    # ======================================
-    # No relevant knowledge found
-    # ======================================
+            if selected_source == "vpn.md":
 
-    if not relevant_documents:
+                confidence = max(
+                    confidence,
+                    0.60
+                )
+
+            elif selected_source == "password.md":
+
+                confidence = max(
+                    confidence,
+                    0.60
+                )
+
+            elif selected_source == "outlook.md":
+
+                confidence = max(
+                    confidence,
+                    0.60
+                )
+
+            elif selected_source == "vscode.md":
+
+                confidence = max(
+                    confidence,
+                    0.75
+                )
+
+            elif selected_source == "wifi.md":
+
+                confidence = max(
+                    confidence,
+                    0.60
+                )
+
+            return {
+                "context": context,
+                "sources": [selected_source],
+                "confidence": round(
+                    confidence,
+                    2
+                ),
+                "escalate": False
+            }
+
+
+    # --------------------------------------------------------
+    # No known intent
+    # --------------------------------------------------------
+
+    if not relevant_chunks:
 
         return {
             "context": "",
@@ -318,173 +567,53 @@ def get_rag_context(
         }
 
 
-    # ======================================
-    # Best relevance score
-    # ======================================
+    # --------------------------------------------------------
+    # Select strongest semantic source
+    # --------------------------------------------------------
 
-    confidence = max(
-        relevance_scores
+    strongest_source = max(
+        source_scores,
+        key=source_scores.get
     )
 
-
-    # ======================================
-    # Known software-request boost
-    # ======================================
-
-    query_lower = query.lower()
-
-    vscode_terms = [
-        "vscode",
-        "vs code",
-        "visual studio code"
+    confidence = source_scores[
+        strongest_source
     ]
 
-    if any(
-        term in query_lower
-        for term in vscode_terms
-    ):
 
-        if any(
-            metadata
-            and metadata.get("source")
-            == "vscode.md"
-            for metadata in relevant_metadatas
-        ):
+    # --------------------------------------------------------
+    # Retrieve complete document
+    # --------------------------------------------------------
 
-            confidence = max(
-                confidence,
-                0.75
-            )
+    context = get_complete_source_document(
+        strongest_source
+    )
 
+    if not context:
 
-    # ======================================
-    # Known VPN boost
-    # ======================================
+        context_parts = [
+            item["document"]
+            for item in relevant_chunks
+        ]
 
-    if "vpn" in query_lower:
-
-        if any(
-            metadata
-            and metadata.get("source")
-            == "vpn.md"
-            for metadata in relevant_metadatas
-        ):
-
-            confidence = max(
-                confidence,
-                0.60
-            )
-
-
-    # ======================================
-    # Known password boost
-    # ======================================
-
-    password_terms = [
-        "password",
-        "sign in",
-        "login",
-        "log in"
-    ]
-
-    if any(
-        term in query_lower
-        for term in password_terms
-    ):
-
-        if any(
-            metadata
-            and metadata.get("source")
-            == "password.md"
-            for metadata in relevant_metadatas
-        ):
-
-            confidence = max(
-                confidence,
-                0.60
-            )
-
-
-    # ======================================
-    # Known Outlook boost
-    # ======================================
-
-    outlook_terms = [
-        "outlook",
-        "email",
-        "mail",
-        "synchroniz"
-    ]
-
-    if any(
-        term in query_lower
-        for term in outlook_terms
-    ):
-
-        if any(
-            metadata
-            and metadata.get("source")
-            == "outlook.md"
-            for metadata in relevant_metadatas
-        ):
-
-            confidence = max(
-                confidence,
-                0.60
-            )
-
-
-    # ======================================
-    # Sources
-    # ======================================
-
-    sources = list(
-        dict.fromkeys(
-            metadata["source"]
-            for metadata in relevant_metadatas
-            if metadata
-            and "source" in metadata
+        context = "\n\n".join(
+            context_parts
         )
-    )
 
 
-    # ======================================
-    # Build context
-    # ======================================
-
-    context_parts = []
-
-    for document in relevant_documents:
-
-        if document:
-
-            context_parts.append(
-                document
-            )
-
-    context = "\n\n".join(
-        context_parts
-    )
-
-
-    # ======================================
-    # Escalation
-    # ======================================
+    # --------------------------------------------------------
+    # Final escalation decision
+    # --------------------------------------------------------
 
     escalate = confidence < 0.35
 
 
     return {
-
         "context": context,
-
-        "sources": sources,
-
+        "sources": [strongest_source],
         "confidence": round(
             confidence,
             2
         ),
-
         "escalate": escalate
-
     }

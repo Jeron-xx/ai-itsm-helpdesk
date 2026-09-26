@@ -7,6 +7,7 @@ from routes.knowledge import router as knowledge_router
 from routes.software_requests import router as software_requests_router
 from routes.audit_logs import router as audit_logs_router
 from routes.servicenow import router as servicenow_router
+from routes.automation import router as automation_router
 
 app = FastAPI(
     title="AI-Powered ITSM Helpdesk",
@@ -49,3 +50,4 @@ app.include_router(knowledge_router)
 app.include_router(software_requests_router)
 app.include_router(audit_logs_router)
 app.include_router(servicenow_router)
+app.include_router(automation_router)
