@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 import ITSMDashboard from "./ITSMDashboard";
@@ -6,18 +7,19 @@ import KnowledgeBase from "./KnowledgeBase";
 import SoftwareRequests from "./SoftwareRequests";
 import AuditLogs from "./AuditLogs";
 import ServiceNow from "./ServiceNow";
+import MyTickets from "./MyTickets";
+import ReactMarkdown from "react-markdown";
 
 import "./App.css";
 
 
 function App() {
+
   // =========================================================
   // USER ROLE
   // =========================================================
 
   const [userRole, setUserRole] = useState(null);
-
-  // employee | support
 
 
   // =========================================================
@@ -48,41 +50,67 @@ function App() {
 
 
   // =========================================================
+  // EMPLOYEE FEEDBACK
+  // =========================================================
+
+  const [feedback, setFeedback] = useState(null);
+
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+
+  const [showEscalationConfirmation, setShowEscalationConfirmation] =
+    useState(false);
+
+
+  // =========================================================
   // LOGIN
   // =========================================================
 
   const handleLogin = (userId, password, role) => {
 
     // Employee credentials
+
     if (
       role === "employee" &&
       userId === "employee" &&
       password === "employee123"
     ) {
+
       setUserRole("employee");
+
       setPage("self-service");
+
       setError("");
+
       return;
     }
 
 
     // IT Support credentials
+
     if (
       role === "support" &&
       userId === "itsupport" &&
       password === "support123"
     ) {
+
       setUserRole("support");
+
       setPage("dashboard");
+
       setError("");
+
       return;
     }
 
 
     // Invalid credentials
+
     setError(
       "Invalid ID or password. Please check your credentials."
     );
+
   };
 
 
@@ -103,6 +131,13 @@ function App() {
     setSelectedTicket(null);
 
     setError("");
+
+    setFeedback(null);
+
+    setFeedbackMessage("");
+
+    setShowEscalationConfirmation(false);
+
   };
 
 
@@ -113,7 +148,9 @@ function App() {
   const analyzeIssue = async () => {
 
     if (!description.trim()) {
+
       setError("Please describe your IT issue.");
+
       return;
     }
 
@@ -126,6 +163,12 @@ function App() {
 
       setResult(null);
 
+      setFeedback(null);
+
+      setFeedbackMessage("");
+
+      setShowEscalationConfirmation(false);
+
 
       const response = await fetch(
         "http://127.0.0.1:8000/api/tickets/analyze",
@@ -137,7 +180,8 @@ function App() {
           },
 
           body: JSON.stringify({
-            description: description,
+          description: description,
+          employee_id: "employee",
           }),
         }
       );
@@ -174,6 +218,143 @@ function App() {
       setLoading(false);
 
     }
+
+  };
+
+
+  // =========================================================
+  // EMPLOYEE FEEDBACK
+  // =========================================================
+
+  const submitFeedback = async (feedbackType) => {
+
+    if (!result?.ticket_id) {
+
+      setFeedbackMessage(
+        "Ticket ID is missing. Please submit your issue again."
+      );
+
+      return;
+    }
+
+
+    // Employee selects unresolved.
+    // Ask before escalating.
+
+    if (feedbackType === "unresolved") {
+
+      setFeedback("unresolved");
+
+      setShowEscalationConfirmation(true);
+
+      setFeedbackMessage("");
+
+      return;
+    }
+
+
+    try {
+
+      setFeedbackLoading(true);
+
+      setFeedbackMessage("");
+
+      setError("");
+
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/tickets/feedback",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+
+            ticket_id: result.ticket_id,
+
+            feedback: feedbackType,
+
+          }),
+
+        }
+      );
+
+
+      const data = await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.detail ||
+          data.message ||
+          `Server returned ${response.status}`
+        );
+
+      }
+
+
+      // Update frontend ticket status.
+
+      setResult((previousResult) => ({
+
+        ...previousResult,
+
+        status: data.status || (
+          feedbackType === "resolved"
+            ? "Resolved"
+            : "Escalated"
+        ),
+
+        escalated: feedbackType === "escalate"
+          ? true
+          : previousResult.escalated,
+
+      }));
+
+
+      setFeedback(feedbackType);
+
+      setShowEscalationConfirmation(false);
+
+
+      if (feedbackType === "resolved") {
+
+        setFeedbackMessage(
+          "Thank you! Your issue has been marked as resolved."
+        );
+
+      } else if (feedbackType === "escalate") {
+
+        setFeedbackMessage(
+          "Your issue has been escalated to IT Support."
+        );
+
+      }
+
+
+    } catch (err) {
+
+      console.error(
+        "Feedback submission error:",
+        err
+      );
+
+      setFeedbackMessage(
+        err.message ||
+        "Unable to submit feedback. Please try again."
+      );
+
+
+    } finally {
+
+      setFeedbackLoading(false);
+
+    }
+
   };
 
 
@@ -200,6 +381,7 @@ function App() {
   if (userRole === "employee") {
 
     return (
+
       <div className="app">
 
         <header className="portal-header">
@@ -211,31 +393,53 @@ function App() {
             <span>
               Employee Helpdesk
             </span>
-
-          </div>
-
-
+            
+      </div>
           <div className="portal-user">
 
-            <span>
-              Employee Portal
-            </span>
+  <span>
+    Employee Portal
+  </span>
 
-            <button
-              className="logout-button"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
+  <button
+    className="nav-button"
+    onClick={() => setPage("my-tickets")}
+  >
+    My Tickets
+  </button>
 
-          </div>
+  <button
+    className="nav-button"
+    onClick={() => setPage("self-service")}
+  >
+    Submit Issue
+  </button>
+
+  <button
+    className="logout-button"
+    onClick={handleLogout}
+  >
+    Logout
+  </button>
+
+</div>
 
         </header>
 
 
         <main className="employee-main">
 
-          <section className="employee-hero">
+  {page === "my-tickets" ? (
+
+    <MyTickets />
+
+  ) : (
+
+    <>
+
+      {/* EMPLOYEE ISSUE SUBMISSION */}
+
+      <section className="employee-hero">
 
             <h2>
               How can we help you?
@@ -258,9 +462,11 @@ function App() {
 
 
             {error && (
+
               <div className="error">
                 {error}
               </div>
+
             )}
 
 
@@ -269,13 +475,19 @@ function App() {
               onClick={analyzeIssue}
               disabled={loading}
             >
+
               {loading
                 ? "Analyzing..."
                 : "Analyze Issue"}
+
             </button>
 
           </section>
 
+
+          {/* =========================================
+              AI ANALYSIS RESULT
+          ========================================= */}
 
           {result && (
 
@@ -285,6 +497,8 @@ function App() {
                 AI Analysis
               </h2>
 
+
+              {/* TICKET DETAILS */}
 
               <div className="result-grid">
 
@@ -347,29 +561,193 @@ function App() {
                   </span>
 
                   <strong>
+
                     {Math.round(
                       (result.confidence || 0) * 100
                     )}
+
                     %
+
                   </strong>
 
                 </div>
 
               </div>
 
+              
+{/* =========================================
+    AI RECOMMENDATION
+========================================= */}
 
-              <div className="result-section">
+
+<div className="result-section">
+  <h3>AI Recommendation</h3>
+
+  <div className="recommendation">
+    <ReactMarkdown>
+       {result?.ai_response || "No recommendation available."}
+
+    </ReactMarkdown>
+  </div>
+</div>
+
+
+
+
+              {/* =========================================
+                  EMPLOYEE FEEDBACK
+              ========================================= */}
+
+              <div className="employee-feedback">
 
                 <h3>
-                  AI Recommendation
+                  Did this resolve your issue?
                 </h3>
 
-                <div className="recommendation">
-                  {result.ai_response}
-                </div>
+
+                {/* Initial feedback buttons */}
+
+                {!feedback && !result.escalated && (
+
+                  <div className="feedback-buttons">
+
+                    <button
+                      type="button"
+                      className="feedback-resolved"
+                      onClick={() =>
+                        submitFeedback("resolved")
+                      }
+                      disabled={feedbackLoading}
+                    >
+
+                      Yes, resolved
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      className="feedback-unresolved"
+                      onClick={() =>
+                        submitFeedback("unresolved")
+                      }
+                      disabled={feedbackLoading}
+                    >
+
+                      No, not resolved
+
+                    </button>
+
+                  </div>
+
+                )}
+
+
+                {/* Already escalated by RAG */}
+
+                {!feedback && result.escalated && (
+
+                  <div className="feedback-information">
+
+                    <p>
+                      This issue has already been
+                      escalated to IT Support because
+                      the available knowledge was
+                      insufficient.
+                    </p>
+
+                  </div>
+
+                )}
+
+
+                {/* Processing */}
+
+                {feedbackLoading && (
+
+                  <p>
+                    Submitting feedback...
+                  </p>
+
+                )}
+
+
+                {/* Feedback response */}
+
+                {feedbackMessage && (
+
+                  <p className="feedback-message">
+
+                    {feedbackMessage}
+
+                  </p>
+
+                )}
+
+
+                {/* Employee unresolved issue */}
+
+                {feedback === "unresolved" &&
+                  showEscalationConfirmation && (
+
+                  <div className="support-escalation">
+
+                    <p>
+                      Your issue is not resolved.
+                      Would you like to escalate
+                      it to IT Support?
+                    </p>
+
+
+                    <div className="feedback-buttons">
+
+                      <button
+                        type="button"
+                        className="feedback-escalate"
+                        onClick={() =>
+                          submitFeedback("escalate")
+                        }
+                        disabled={feedbackLoading}
+                      >
+
+                        Contact IT Support
+
+                      </button>
+
+
+                      <button
+                        type="button"
+                        className="feedback-retry"
+                        onClick={() => {
+
+                          setFeedback(null);
+
+                          setFeedbackMessage("");
+
+                          setShowEscalationConfirmation(
+                            false
+                          );
+
+                        }}
+                        disabled={feedbackLoading}
+                      >
+
+                        Try again
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                )}
 
               </div>
 
+
+              {/* =========================================
+                  KNOWLEDGE SOURCES
+              ========================================= */}
 
               <div className="result-section">
 
@@ -390,7 +768,9 @@ function App() {
                           className="source-tag"
                           key={source}
                         >
+
                           {source}
+
                         </span>
 
                       )
@@ -401,13 +781,19 @@ function App() {
                 ) : (
 
                   <span className="source-tag">
+
                     No sources available
+
                   </span>
 
                 )}
 
               </div>
 
+
+              {/* =========================================
+                  TICKET STATUS
+              ========================================= */}
 
               <div className="status-box">
 
@@ -421,8 +807,10 @@ function App() {
                 {result.escalated && (
 
                   <p>
+
                     This issue has been escalated
                     to IT Support.
+
                   </p>
 
                 )}
@@ -433,10 +821,15 @@ function App() {
 
           )}
 
+           </>
+          )}
+
         </main>
 
       </div>
+
     );
+
   }
 
 
@@ -475,7 +868,9 @@ function App() {
               setPage("dashboard")
             }
           >
+
             ITSM Dashboard
+
           </button>
 
 
@@ -489,7 +884,9 @@ function App() {
               setPage("knowledge")
             }
           >
+
             Knowledge Base
+
           </button>
 
 
@@ -503,7 +900,9 @@ function App() {
               setPage("software")
             }
           >
+
             Software Requests
+
           </button>
 
 
@@ -517,7 +916,9 @@ function App() {
               setPage("audit")
             }
           >
+
             Audit Logs
+
           </button>
 
 
@@ -531,7 +932,9 @@ function App() {
               setPage("servicenow")
             }
           >
+
             ServiceNow
+
           </button>
 
 
@@ -539,13 +942,19 @@ function App() {
             className="logout-button"
             onClick={handleLogout}
           >
+
             Logout
+
           </button>
 
         </nav>
 
       </header>
 
+
+      {/* =========================================
+          IT SUPPORT CONTENT
+      ========================================= */}
 
       <main className="support-main">
 
@@ -603,7 +1012,9 @@ function App() {
       </main>
 
     </div>
+
   );
+
 }
 
 
@@ -659,11 +1070,9 @@ function LoginScreen({
       <div className="login-container">
 
 
-        <div className="login-brand">
+        {/* LOGIN BRAND */}
 
-          <div className="login-logo">
-            AI
-          </div>
+        <div className="login-brand">
 
           <h1>
             AI ITSM Helpdesk
@@ -691,7 +1100,9 @@ function LoginScreen({
               switchLoginType("employee")
             }
           >
+
             Employee
+
           </button>
 
 
@@ -706,7 +1117,9 @@ function LoginScreen({
               switchLoginType("support")
             }
           >
+
             IT Support
+
           </button>
 
         </div>
@@ -729,9 +1142,11 @@ function LoginScreen({
 
 
           <label>
+
             {loginType === "employee"
               ? "Employee ID"
               : "IT Support ID"}
+
           </label>
 
 
@@ -769,7 +1184,9 @@ function LoginScreen({
           {error && (
 
             <div className="login-error">
+
               {error}
+
             </div>
 
           )}
@@ -779,9 +1196,11 @@ function LoginScreen({
             type="submit"
             className="login-button"
           >
+
             {loginType === "employee"
               ? "Employee Login"
               : "Support Login"}
+
           </button>
 
         </form>
@@ -799,17 +1218,25 @@ function LoginScreen({
           {loginType === "employee" ? (
 
             <p>
+
               <strong>ID:</strong> employee
+
               <br />
+
               <strong>Password:</strong> employee123
+
             </p>
 
           ) : (
 
             <p>
+
               <strong>ID:</strong> itsupport
+
               <br />
+
               <strong>Password:</strong> support123
+
             </p>
 
           )}
@@ -818,14 +1245,18 @@ function LoginScreen({
 
 
         <p className="prototype-note">
+
           Prototype authentication for
           demonstration purposes
+
         </p>
 
       </div>
 
     </div>
+
   );
+
 }
 
 

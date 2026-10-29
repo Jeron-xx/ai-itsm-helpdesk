@@ -1,3 +1,8 @@
+
+/* =========================================
+   GLOBAL
+========================================= */
+
 * {
   box-sizing: border-box;
 }
@@ -9,14 +14,41 @@ body {
   color: #172033;
 }
 
+#root,
 .app {
+  width: 100%;
+  max-width: none;
   min-height: 100vh;
+  margin: 0;
 }
 
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
 .header {
+  width: 100%;
   background: #172033;
   color: white;
-  padding: 24px 8%;
+  padding: 24px 3%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
 .header h1 {
@@ -29,11 +61,35 @@ body {
   color: #cbd5e1;
 }
 
-.container {
-  width: 90%;
-  max-width: 1000px;
-  margin: 40px auto;
+.header nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
+
+.header nav button {
+  margin-top: 0;
+  background: #334155;
+}
+
+.header nav button:hover {
+  background: #1677e8;
+}
+
+/* =========================================
+   GENERAL CONTAINER
+========================================= */
+
+.container {
+  width: 100%;
+  max-width: none;
+  margin: 30px 0;
+  padding: 0 3%;
+}
+
+/* =========================================
+   GENERAL CARDS
+========================================= */
 
 .hero,
 .result {
@@ -52,6 +108,10 @@ body {
   color: #64748b;
 }
 
+/* =========================================
+   INPUTS
+========================================= */
+
 textarea {
   width: 100%;
   min-height: 150px;
@@ -61,6 +121,7 @@ textarea {
   border-radius: 10px;
   resize: vertical;
   font-size: 16px;
+  font-family: inherit;
 }
 
 button {
@@ -71,7 +132,6 @@ button {
   background: #2563eb;
   color: white;
   font-size: 16px;
-  cursor: pointer;
 }
 
 button:disabled {
@@ -79,13 +139,18 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* =========================================
+   RESULT
+========================================= */
+
 .result {
+  width: 100%;
   margin-top: 25px;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 15px;
 }
 
@@ -137,11 +202,9 @@ button:disabled {
   border-radius: 10px;
 }
 
-@media (max-width: 700px) {
-  .info-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+/* =========================================
+   APP HEADER NAVIGATION
+========================================= */
 
 .header {
   display: flex;
@@ -149,17 +212,12 @@ button:disabled {
   align-items: center;
 }
 
-.header nav {
-  display: flex;
-  gap: 10px;
-}
-
-.header nav button {
-  margin-top: 0;
-  background: #334155;
-}
+/* =========================================
+   DASHBOARD
+========================================= */
 
 .dashboard {
+  width: 100%;
   background: white;
   padding: 30px;
   border-radius: 14px;
@@ -171,6 +229,7 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  gap: 20px;
 }
 
 .dashboard-header p {
@@ -181,7 +240,48 @@ button:disabled {
   margin-top: 0;
 }
 
+.dashboard h2 {
+  color: #172033;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  color: #172033;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  min-width: 0;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-card span {
+  display: block;
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.stat-card strong {
+  font-size: 26px;
+  color: #172033;
+}
+
+/* =========================================
+   TICKET TABLE
+========================================= */
+
 .ticket-table-container {
+  width: 100%;
   overflow-x: auto;
 }
 
@@ -206,47 +306,6 @@ button:disabled {
   font-size: 14px;
 }
 
-.dashboard h2 {
-  color: #172033;
-}
-
-.dashboard-header h2 {
-  margin: 0;
-  color: #172033;
-}
-
-.dashboard-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-.stat-card {
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-}
-
-.stat-card span {
-  display: block;
-  color: #64748b;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.stat-card strong {
-  font-size: 26px;
-  color: #172033;
-}
-
-@media (max-width: 700px) {
-  .dashboard-stats {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .ticket-row {
   cursor: pointer;
   transition: background 0.2s;
@@ -256,7 +315,38 @@ button:disabled {
   background: #f1f5f9;
 }
 
+.priority {
+  font-weight: 600;
+}
+
+.priority.high {
+  color: #c62828;
+}
+
+.priority.medium {
+  color: #e68a00;
+}
+
+.priority.low {
+  color: #2e7d32;
+}
+
+.ticket-status {
+  font-weight: 600;
+}
+
+.dashboard-hint {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+/* =========================================
+   AI ANALYSIS
+========================================= */
+
 .analysis-page {
+  width: 100%;
   background: white;
   padding: 30px;
   border-radius: 14px;
@@ -268,6 +358,7 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  gap: 20px;
 }
 
 .analysis-header h2 {
@@ -298,7 +389,7 @@ button:disabled {
 
 .analysis-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -321,7 +412,8 @@ button:disabled {
 }
 
 .ai-response {
-  line-height: 1.8;
+  text-align: left;
+  line-height: 1.7;
   white-space: pre-line;
 }
 
@@ -373,18 +465,46 @@ button:disabled {
   color: #9a3412;
 }
 
-@media (max-width: 800px) {
-  .analysis-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+/* AI response formatting */
 
-  .rag-info {
-    flex-direction: column;
-    gap: 20px;
-  }
+.ai-response h1,
+.ai-response h2,
+.ai-response h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #172033;
 }
 
+.ai-response p {
+  margin: 10px 0;
+}
+
+.ai-response ol,
+.ai-response ul {
+  margin: 15px 0;
+  padding-left: 30px;
+}
+
+.ai-response li {
+  margin-bottom: 10px;
+}
+
+.ai-response strong {
+  font-weight: 700;
+}
+
+.ai-response code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #e2e8f0;
+}
+
+/* =========================================
+   KNOWLEDGE BASE
+========================================= */
+
 .knowledge-page {
+  width: 100%;
   background: white;
   padding: 30px;
   border-radius: 14px;
@@ -405,8 +525,9 @@ button:disabled {
 }
 
 .knowledge-layout {
+  width: 100%;
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   gap: 20px;
 }
 
@@ -453,6 +574,7 @@ button:disabled {
 }
 
 .knowledge-content {
+  min-width: 0;
   padding: 25px;
   background: #f8fafc;
   border-radius: 10px;
@@ -482,56 +604,16 @@ button:disabled {
   color: #64748b;
 }
 
-@media (max-width: 800px) {
-  .knowledge-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.ai-response {
-  text-align: left;
-  line-height: 1.7;
-}
-
-.ai-response h1,
-.ai-response h2,
-.ai-response h3 {
-  margin-top: 20px;
-  margin-bottom: 10px;
-  color: #172033;
-}
-
-.ai-response p {
-  margin: 10px 0;
-}
-
-.ai-response ol,
-.ai-response ul {
-  margin: 15px 0;
-  padding-left: 30px;
-}
-
-.ai-response li {
-  margin-bottom: 10px;
-}
-
-.ai-response strong {
-  font-weight: 700;
-}
-
-.ai-response code {
-  padding: 2px 5px;
-  border-radius: 4px;
-  background: #e2e8f0;
-}
-
-/* Software Request Form */
+/* =========================================
+   SOFTWARE REQUESTS
+========================================= */
 
 .request-form-card {
+  width: 100%;
+  max-width: 800px;
   background: white;
   padding: 25px;
   margin: 25px auto;
-  max-width: 800px;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
@@ -584,8 +666,9 @@ button:disabled {
 }
 
 .software-list {
-  margin: 30px auto;
-  max-width: 1100px;
+  width: 100%;
+  max-width: none;
+  margin: 30px 0;
 }
 
 .software-list-header {
@@ -593,6 +676,7 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  gap: 15px;
 }
 
 .refresh-button {
@@ -604,7 +688,12 @@ button:disabled {
   cursor: pointer;
 }
 
+/* =========================================
+   TABLES
+========================================= */
+
 .table-container {
+  width: 100%;
   overflow-x: auto;
 }
 
@@ -647,12 +736,15 @@ button:disabled {
   font-weight: 600;
 }
 
-/* Audit Logs */
+/* =========================================
+   AUDIT LOGS
+========================================= */
 
 .audit-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 30px 3%;
 }
 
 .audit-header {
@@ -669,6 +761,7 @@ button:disabled {
 }
 
 .audit-table-container {
+  width: 100%;
   overflow-x: auto;
   background: white;
   border-radius: 10px;
@@ -699,12 +792,15 @@ button:disabled {
   border-bottom: none;
 }
 
-/* ITSM Dashboard */
+/* =========================================
+   ITSM DASHBOARD PAGE
+========================================= */
 
 .dashboard-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 30px 3%;
 }
 
 .dashboard-header {
@@ -712,6 +808,7 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  gap: 20px;
 }
 
 .dashboard-header h2 {
@@ -724,12 +821,13 @@ button:disabled {
 
 .dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 30px;
 }
 
 .stat-card {
+  min-width: 0;
   background: white;
   padding: 22px;
   border-radius: 10px;
@@ -747,6 +845,7 @@ button:disabled {
 }
 
 .ticket-section {
+  width: 100%;
   background: white;
   border-radius: 10px;
   padding: 20px;
@@ -811,32 +910,15 @@ button:disabled {
   font-size: 14px;
 }
 
-/* Responsive dashboard */
-
-@media (max-width: 900px) {
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .dashboard-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-}
-
-/* Mock ServiceNow */
+/* =========================================
+   MOCK SERVICENOW
+========================================= */
 
 .servicenow-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 30px 3%;
 }
 
 .servicenow-header {
@@ -853,6 +935,7 @@ button:disabled {
 }
 
 .servicenow-table-container {
+  width: 100%;
   overflow-x: auto;
   background: white;
   border-radius: 10px;
@@ -879,157 +962,24 @@ button:disabled {
   border-bottom: none;
 }
 
-/* =========================================================
-   Login
-   ========================================================= */
-
-.login-page {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #eef3f8;
-  padding: 30px;
-}
-
-.login-container {
-  width: 420px;
-  background: white;
-  border-radius: 18px;
-  padding: 35px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-}
-
-.login-brand {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.login-logo {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 15px;
-  background: #1677e8;
-  color: white;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.login-brand h1 {
-  margin: 0;
-  padding: 0;
-  color: #17253a;
-  font-size: 24px;
-  line-height: 1.2;
-  font-weight: 700;
-  display: block;
-  height: auto;
-}
-
-.login-brand p {
-  color: #64748b;
-  margin: 8px 0 0 0;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.login-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 25px;
-}
-
-.login-tab {
-  flex: 1;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #edf2f7;
-  color: #475569;
-  font-weight: 600;
-}
-
-.login-tab.active {
-  background: #1677e8;
-  color: white;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-}
-
-.login-form h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #17253a;
-}
-
-.login-form label {
-  margin-bottom: 7px;
-  color: #334155;
-  font-weight: 600;
-}
-
-.login-form input {
-  padding: 12px;
-  margin-bottom: 17px;
-  border: 1px solid #d6dee8;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-}
-
-.login-form input:focus {
-  border-color: #1677e8;
-}
-
-.login-button {
-  border: none;
-  padding: 13px;
-  border-radius: 8px;
-  background: #1677e8;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 5px;
-}
-
-.login-button:hover {
-  opacity: 0.92;
-}
-
-.prototype-note {
-  text-align: center;
-  margin-top: 22px;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-
-/* =========================================================
-   Portal Header
-   ========================================================= */
+/* =========================================
+   PORTAL HEADER
+========================================= */
 
 .portal-header {
-  min-height: 82px;
-  background: #122238;
-  color: white;
+  width: 100%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 15px 35px;
+  align-items: center;
   gap: 20px;
+  background: #0b2537;
+  color: white;
+  padding: 24px 3%;
 }
 
 .brand h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 28px;
 }
 
 .brand span {
@@ -1083,18 +1033,19 @@ button:disabled {
   opacity: 0.9;
 }
 
-
-/* =========================================================
-   Employee Portal
-   ========================================================= */
+/* =========================================
+   EMPLOYEE PORTAL
+========================================= */
 
 .employee-main {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 45px 25px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 35px 3%;
 }
 
 .employee-hero {
+  width: 100%;
   background: white;
   border-radius: 14px;
   padding: 35px;
@@ -1139,20 +1090,12 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.error {
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 7px;
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-
-/* =========================================================
-   Employee Analysis Result
-   ========================================================= */
+/* =========================================
+   EMPLOYEE ANALYSIS RESULT
+========================================= */
 
 .analysis-result {
+  width: 100%;
   margin-top: 25px;
   background: white;
   border-radius: 14px;
@@ -1167,11 +1110,12 @@ button:disabled {
 
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
 .result-card {
+  min-width: 0;
   background: #f6f8fb;
   border-radius: 9px;
   padding: 17px;
@@ -1186,121 +1130,12 @@ button:disabled {
 }
 
 .result-card strong {
-  color: #17253a;
-  font-size: 14px;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-.result-section {
-  margin-top: 20px;
-  padding: 20px;
-  background: #f7f9fc;
-  border-radius: 9px;
-}
-
-.result-section h3 {
-  margin-top: 0;
-  color: #17253a;
-  text-align: center;
-}
-
-.recommendation {
-  white-space: pre-line;
-  line-height: 1.7;
-  color: #334155;
-}
-
-.source-list {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.source-tag {
-  display: inline-block;
-  padding: 7px 12px;
-  border-radius: 20px;
-  background: #e5edf7;
-  color: #334155;
-  font-size: 12px;
-}
-
-.status-box {
-  margin-top: 20px;
-  padding: 17px;
-  text-align: center;
-  border-radius: 9px;
-  background: #f7f9fc;
-  color: #334155;
-}
-
-.status-box p {
-  margin-bottom: 0;
-  color: #b45309;
-}
-
-
-/* =========================================================
-   Support Portal
-   ========================================================= */
-
-.support-main {
-  padding: 25px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-
-/* =========================================================
-   Responsive
-   ========================================================= */
-
-@media (max-width: 900px) {
-
-  .portal-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .support-navigation {
-    justify-content: flex-start;
-  }
-
-  .result-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-}
-
-
-@media (max-width: 600px) {
-
-  .login-container {
-    width: 100%;
-    padding: 25px;
-  }
-
-  .employee-main {
-    padding: 20px 12px;
-  }
-
-  .employee-hero,
-  .analysis-result {
-    padding: 20px;
-  }
-
-  .result-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .support-main {
-    padding: 12px;
-  }
-
-}
-
-/* Password Self-Healing Automation */
+/* =========================================
+   PASSWORD SELF-HEALING AUTOMATION
+========================================= */
 
 .automation-card {
   border-left: 4px solid #2563eb;
@@ -1342,7 +1177,7 @@ button:disabled {
 
 .automation-result-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -1359,8 +1194,488 @@ button:disabled {
 
 .automation-result-grid strong {
   font-size: 15px;
+  overflow-wrap: anywhere;
 }
 
 .automation-message {
   margin-top: 20px;
+}
+
+/* =========================================
+   RESPONSIVE TABLETS
+========================================= */
+
+@media (max-width: 900px) {
+  .dashboard-stats,
+  .analysis-grid,
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .knowledge-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .rag-info {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .automation-result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================
+   RESPONSIVE MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+  .header,
+  .portal-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header nav,
+  .support-navigation {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .portal-user {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .employee-main,
+  .support-main {
+    padding: 15px;
+  }
+
+  .employee-hero,
+  .analysis-result,
+  .analysis-page,
+  .knowledge-page,
+  .dashboard,
+  .ticket-section {
+    padding: 20px;
+  }
+
+  .dashboard-page,
+  .audit-page,
+  .servicenow-page {
+    padding: 15px;
+  }
+
+  .dashboard-stats,
+  .analysis-grid,
+  .result-grid,
+  .info-grid,
+  .automation-result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header,
+  .analysis-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .login-container {
+    width: 100%;
+    padding: 25px;
+  }
+
+  .employee-main {
+    padding: 20px 12px;
+  }
+
+  .employee-hero,
+  .analysis-result {
+    padding: 20px;
+  }
+
+  .knowledge-content {
+    padding: 15px;
+  }
+
+  .software-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table-container,
+  .ticket-table-container,
+  .audit-table-container,
+  .servicenow-table-container {
+    overflow-x: auto;
+  }
+}
+
+
+/* =========================================
+   COMPACT LOGIN PAGE
+========================================= */
+
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 25px 15px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #f1f5f9;
+  color: #172033;
+}
+
+/* Login card */
+
+.login-container {
+  width: 100%;
+  max-width: 440px;
+  margin: 10px auto;
+  padding: 24px 28px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+  color: #172033;
+}
+
+/* Login heading */
+
+.login-container h1 {
+  color: #172033 !important;
+  font-size: 27px;
+  font-weight: 600;
+  margin: 0 0 5px;
+  text-align: center;
+}
+
+.login-container h2 {
+  color: #172033 !important;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 18px 0 15px;
+  text-align: center;
+}
+
+.login-container h3 {
+  color: #172033 !important;
+  font-size: 16px;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.login-container p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Role selection buttons */
+
+.login-container button {
+  margin: 5px;
+}
+
+.login-container > button {
+  padding: 9px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+/* Login form */
+
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* Labels */
+
+.login-container label {
+  display: block;
+  margin-bottom: 4px;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Input fields */
+
+.login-container input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.login-container input::placeholder {
+  color: #94a3b8;
+}
+
+.login-container input:focus {
+  outline: none;
+  border-color: #1677e8;
+  box-shadow: 0 0 0 2px rgba(22, 119, 232, 0.12);
+}
+
+/* Login submit button */
+
+.login-container form button {
+  width: 100%;
+  margin: 5px 0 0;
+  padding: 11px;
+  border: none;
+  border-radius: 6px;
+  background: #1677e8;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.login-container form button:hover {
+  background: #095fc4;
+}
+
+/* Demo credentials */
+
+.login-container .demo-credentials {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 7px;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.login-container .demo-credentials h3 {
+  margin-bottom: 8px;
+}
+
+.login-container .demo-credentials p {
+  margin: 3px 0;
+  color: #334155;
+  font-size: 13px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .login-page {
+    padding: 12px;
+  }
+
+  .login-container {
+    max-width: 100%;
+    margin: 5px auto;
+    padding: 20px;
+  }
+
+  .login-container h1 {
+    font-size: 24px;
+  }
+}
+
+/* AI Recommendation formatting */
+
+
+.recommendation {
+    text-align: left;
+    line-height: 1.7;
+    font-size: 15px;
+    color: #263238;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.recommendation h1,
+.recommendation h2,
+.recommendation h3 {
+    color: #1e293b;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.recommendation h2 {
+    font-size: 20px;
+}
+
+.recommendation p {
+    margin-bottom: 12px;
+}
+
+.recommendation ol,
+.recommendation ul {
+    padding-left: 25px;
+    margin-bottom: 15px;
+}
+
+.recommendation li {
+    margin-bottom: 8px;
+}
+
+.recommendation strong {
+    color: #0f172a;
+}
+
+
+
+/* ==========================================
+   MY TICKETS PAGE
+========================================== */
+
+.my-tickets-page {
+  padding: 25px;
+  color: #1e293b;
+}
+
+.my-tickets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.my-tickets-header h2 {
+  margin-bottom: 8px;
+}
+
+.my-tickets-header p {
+  color: #64748b;
+  margin: 0;
+}
+
+.my-tickets-header button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.tickets-list {
+  display: grid;
+  gap: 18px;
+}
+
+.ticket-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.ticket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.ticket-card-header h3 {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.ticket-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.ticket-status.open {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.ticket-status.resolved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.ticket-status.escalated {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.ticket-status.other {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.ticket-description {
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.ticket-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 15px;
+}
+
+.ticket-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ticket-details span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.ticket-details strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.no-tickets,
+.ticket-error {
+  padding: 25px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.ticket-error {
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .my-tickets-page {
+    padding: 15px;
+  }
+
+  .ticket-details {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

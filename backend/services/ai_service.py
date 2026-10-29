@@ -138,6 +138,10 @@ STRICT RULES:
 13. If escalation information exists in the approved knowledge,
     include it.
 14. Keep the answer concise.
+15. Format troubleshooting steps as a numbered list.
+16. Put each numbered step on a separate line.
+17. Do not combine multiple steps into one paragraph.
+18. Use a blank line before the escalation section.
 """
 
     user_prompt = f"""
@@ -150,6 +154,13 @@ Approved IT knowledge:
 {context}
 
 Generate ONLY the final IT troubleshooting answer.
+
+Formatting requirements:
+- Start with a short troubleshooting introduction.
+- Put each troubleshooting step on a separate line.
+- Use numbered steps.
+- Do not combine steps into one paragraph.
+- Include escalation information if provided.
 """
 
     messages = [
@@ -182,7 +193,7 @@ Generate ONLY the final IT troubleshooting answer.
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=180,
+            max_new_tokens=300,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id
         )

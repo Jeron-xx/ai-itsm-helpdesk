@@ -51,3 +51,21 @@ def create_servicenow_incident(
     servicenow_collection.insert_one(record)
 
     return incident_number
+
+def update_servicenow_status(
+    ticket_id: str,
+    status: str
+):
+    result = servicenow_collection.update_one(
+        {
+            "ticket_id": ticket_id
+        },
+        {
+            "$set": {
+                "status": status,
+                "updated_at": datetime.utcnow()
+            }
+        }
+    )
+
+    return result.modified_count
